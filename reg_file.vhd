@@ -17,7 +17,7 @@ use work.mymatrix.all;
 entity reg_file is
 
   generic(
-    K: integer := 1;         -- K bit selector, 2^K words register
+    K: integer := 2;         -- K bit selector, 2^K words register
     N: integer := 8          -- N bit register word
   );
 

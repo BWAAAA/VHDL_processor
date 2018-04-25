@@ -6,7 +6,7 @@ use IEEE.numeric_std.all;
 entity generic_decoder is
   
   generic(
-    k: integer := 1     -- selector bit
+    k: integer := 2     -- selector bit
   );
   
   port(
