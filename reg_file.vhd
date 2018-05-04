@@ -21,19 +21,19 @@ entity reg_file is
     N: integer := 8          -- N bit register word
   );
 
-  port(
-    clk: in std_logic;
-    
-    reg_in: in std_logic_vector(N-1 downto 0);     -- register in to write
-    sel_wr: in std_logic_vector(K-1 downto 0);     -- select register location to write
-    wr: in std_logic;                              -- wr control, 1 = write enable
-    
-    sel_r1: in std_logic_vector(K-1 downto 0);     -- register1 read control
-    sel_r2: in std_logic_vector(K-1 downto 0);     -- register2 read control
-    
-    reg_out1: out std_logic_vector(N-1 downto 0);  -- register1 output
-    reg_out2: out std_logic_vector(N-1 downto 0)   -- register2 output
-  );
+    port(
+      clk: in std_logic;
+      
+      reg_in: in std_logic_vector(N-1 downto 0);     -- register in to write
+      sel_wr: in std_logic_vector(K-1 downto 0);     -- select register location to write
+      wr: in std_logic;                              -- wr control, 1 = write enable
+      
+      sel_r1: in std_logic_vector(K-1 downto 0);     -- register1 read control
+      sel_r2: in std_logic_vector(K-1 downto 0);     -- register2 read control
+      
+      reg_out1: out std_logic_vector(N-1 downto 0);  -- register1 output
+      reg_out2: out std_logic_vector(N-1 downto 0)   -- register2 output
+    );
 
 end reg_file;
 
