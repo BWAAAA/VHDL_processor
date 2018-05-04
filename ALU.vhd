@@ -54,8 +54,7 @@ architecture data_flow of ALU is
           res_temp(i) <= (rs(i) xor rt_temp(i)) xor carry(i);
           carry(i+1) <= (rs(i) and rt_temp(i)) or (carry(i) and (rs(i) xor rt_temp(i)));
         end loop;
-    
-    
+
       end if;
       
       
