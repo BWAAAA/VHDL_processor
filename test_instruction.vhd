@@ -20,7 +20,8 @@ entity test_instruction is
     
     r1_reg: out std_logic_vector(N-1 downto 0);
     r2_reg: out std_logic_vector(N-1 downto 0);
-    op: out std_logic_vector(1 downto 0)
+    op: out std_logic_vector(1 downto 0);
+    ALUout: out std_logic_vector(N-1 downto 0)
   );
   
 end test_instruction;
@@ -54,19 +55,42 @@ architecture Structural of test_instruction is
     );
   end component;
   
-  signal rs_temp: std_logic_vector(1 downto 0);
-  signal rt_temp: std_logic_vector(1 downto 0);
-  signal rd_temp: std_logic_vector(1 downto 0);
+  component ALU is
+    port(
+      rs, rt: in std_logic_vector(N-1 downto 0);        -- 2 input register rs rt
+      ALUop: in std_logic_vector(K-1 downto 0);         -- 2 bit ALU operation selector
+      clk: in std_logic;
+      
+      
+      rd: out std_logic_vector(N-1 downto 0)            -- 1 output register rd
+    );
+  end component;
+  
+  
+  signal rs_addr_temp: std_logic_vector(1 downto 0);
+  signal rt_addr_temp: std_logic_vector(1 downto 0);
+  signal rd_addr_temp: std_logic_vector(1 downto 0);
   signal op_temp: std_logic_vector(1 downto 0);
 
+  signal rs_reg_temp: std_logic_vector(N-1 downto 0);
+  signal rt_reg_temp: std_logic_vector(N-1 downto 0);
+  signal rd_reg_temp: std_logic_vector(N-1 downto 0);
+  
   begin
   
     U0: Split_instruction
-      port map(instr, op_temp, rs_temp, rt_temp, rd_temp);
+      port map(instr, op_temp, rs_addr_temp, rt_addr_temp, rd_addr_temp);
     
     U1: reg_file
-      port map(clk, wr_data, rd_temp, wr, rs_temp, rt_temp, r1_reg, r2_reg);
-      
-    op <= op_temp;
+      port map(clk, wr_data, rd_addr_temp, wr, rs_addr_temp, rt_addr_temp, rs_reg_temp, rt_reg_temp);    
+    
+    U2: ALU
+      port map(rs_reg_temp, rt_reg_temp, op_temp, clk, rd_reg_temp);
   
+        
+    op <= op_temp;
+    r1_reg <= rs_reg_temp;
+    r2_reg <= rt_reg_temp;
+    ALUout <= rd_reg_temp;
+    
 end Structural;
