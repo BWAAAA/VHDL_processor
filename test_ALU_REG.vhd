@@ -59,27 +59,18 @@ architecture test of test_ALU_REG is
   signal r2_temp: std_logic_vector(N-1 downto 0);
   signal out_temp: std_logic_vector(N-1 downto 0);
   
-  signal r1_wr_temp: std_logic_vector(N-1 downto 0);    -- dummy
-  signal r2_wr_temp: std_logic_vector(N-1 downto 0);
-  
   signal reg_data: std_logic_vector(N-1 downto 0);
   
   begin
       
       reg_data <= out_temp when st = '1' and wr = '1' else
                   data;
-    
+                  
+      aluOUT <= out_temp when st = '1';
+      
       U0: reg_file
         port map(clk, reg_data, sel_wr, wr, rs, rt, r1_temp, r2_temp);
       U1: ALU
         port map(r1_temp, r2_temp, ALUop, clk, out_temp);  
-        
-      process(clk)
-      begin
-        if st = '1' then 
-          aluOUT <= out_temp;
-        end if;
 
-      end process;
-      
 end test;
