@@ -49,7 +49,6 @@ entity simple_processor is
     -- output
     r1_reg: out std_logic_vector(N-1 downto 0);
     r2_reg: out std_logic_vector(N-1 downto 0);
-    ins_out: out std_logic_vector(I-1 downto 0);
     ALU_output: out std_logic_vector(N-1 downto 0)
   );
   
@@ -168,6 +167,5 @@ architecture Structural of simple_processor is
   r1_reg <= rs_reg;
   r2_reg <= rt_reg;
   ALU_output <= rd_reg;
-  ins_out <= instr_temp;
   
 end Structural;
