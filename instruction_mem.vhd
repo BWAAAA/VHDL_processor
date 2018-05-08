@@ -15,15 +15,14 @@ use IEEE.numeric_std.all;
 use work.instruction_memory.all;
 
 
-
-
 entity instruction_mem is
   generic(
-    I: integer := 16    -- I bit instruction word
+    I: integer := 16;    -- I bit instruction word
+    PC_size: integer := 4
   );
 
   port(
-    PC: in std_logic_vector(3 downto 0);
+    PC: in std_logic_vector(PC_size-1 downto 0);
     
     instr: out std_logic_vector(I-1 downto 0)
   );
