@@ -26,5 +26,4 @@ architecture data_flow of Split_Instruction is
     rt <= instr(I-7 downto I-8);
     rd <= instr(I-9 downto I-10);
     
-    
 end data_flow;
