@@ -1,24 +1,38 @@
--- simple processor without PC
+-- simple processor with PC
+
+-- PC size = 4 bit -> 2^4 instruction word
+
 
 -- instruction word size = 16 bits
+-- instruction memory size = 16 word of instruction
 -----------------------------------------
 -- instruction field| op | rs | rt | rd |
 -- size             |  4 |  4 |  4 |  4 |
 -----------------------------------------
 
+
+-- register size 8 bits per word
+-- 16 words register file r0: 0000 to r15: 1111
+
+
 -- op = 00xx
--- assign user input data(rs rt) to rd
+-- assign user input data(rs & rt (8 bits)) to rd
+
+-- op = 10xx, 11xx
+-- do nothing use for read register
 
 -- op = 11xx
 -- ALU xx operation, and write result to rd
---    00  rd = rs and rt
---    01  rd = rs or rt
---    10  rd = rs + rt
---    11  rd = rs - rt
+-------------------------------------------
+-- ALU operation
+--     00  rd = rs and rt
+--     01  rd = rs or rt
+--     10  rd = rs + rt
+--     11  rd = rs - rt
+
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-
 
 entity simple_processor is
   generic(
@@ -35,6 +49,7 @@ entity simple_processor is
     -- output
     r1_reg: out std_logic_vector(N-1 downto 0);
     r2_reg: out std_logic_vector(N-1 downto 0);
+    ins_out: out std_logic_vector(I-1 downto 0);
     ALU_output: out std_logic_vector(N-1 downto 0)
   );
   
@@ -42,8 +57,6 @@ end simple_processor;
  
 
 architecture Structural of simple_processor is
-
-
 
   component PC is
     port(
@@ -155,5 +168,6 @@ architecture Structural of simple_processor is
   r1_reg <= rs_reg;
   r2_reg <= rt_reg;
   ALU_output <= rd_reg;
+  ins_out <= instr_temp;
   
 end Structural;
