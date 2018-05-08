@@ -1,13 +1,13 @@
 -- simple processor without PC
 
--- instruction word size = 10 bits
+-- instruction word size = 16 bits
 -----------------------------------------
 -- instruction field| op | rs | rt | rd |
--- size             |  4 |  2 |  2 |  2 |
+-- size             |  4 |  4 |  4 |  4 |
 -----------------------------------------
 
 -- op = 00xx
--- assign user input data to rd when write = 1
+-- assign user input data(rs rt) to rd
 
 -- op = 11xx
 -- ALU xx operation, and write result to rd
@@ -22,19 +22,15 @@ use IEEE.std_logic_1164.all;
 
 entity simple_processor is
   generic(
-    I: integer := 10;   -- I bits Instruction word
+    I: integer := 16;   -- I bits Instruction word
     N: integer := 8;    -- N bits register word
-    K: integer := 2    -- K bits reg selector 
+    K: integer := 4;    -- K bits reg selector 
+    PC_Size: integer := 4
   );
 
 
   port(
     clk: in std_logic;
-    instr: in std_logic_vector(I-1 downto 0);
-    
-    --write
-    wr: in std_logic;      -- enable to write data to rd register
-    wr_data: in std_logic_vector(N-1 downto 0);     -- data
     
     -- output
     r1_reg: out std_logic_vector(N-1 downto 0);
@@ -47,14 +43,34 @@ end simple_processor;
 
 architecture Structural of simple_processor is
 
+
+
+  component PC is
+    port(
+      clk: in std_logic;
+      
+      PC: out std_logic_vector(PC_Size-1 downto 0)
+    );
+  end component;
+
+
+  component instruction_mem is
+    port(
+      PC: in std_logic_vector(PC_size-1 downto 0);
+      
+      instr: out std_logic_vector(I-1 downto 0)
+    );
+
+  end component;
+
   component Split_instruction is
     port(
       instr: in std_logic_vector(I-1 downto 0);   -- instruction input
 
       op: out std_logic_vector(3 downto 0);
-      rs: out std_logic_vector(1 downto 0);
-      rt: out std_logic_vector(1 downto 0);
-      rd: out std_logic_vector(1 downto 0)
+      rs: out std_logic_vector(K-1 downto 0);
+      rt: out std_logic_vector(K-1 downto 0);
+      rd: out std_logic_vector(K-1 downto 0)
     );
   end component;
   
@@ -77,19 +93,22 @@ architecture Structural of simple_processor is
   component ALU is
     port(
       rs, rt: in std_logic_vector(N-1 downto 0);
-      ALUop: in std_logic_vector(K-1 downto 0);
+      ALUop: in std_logic_vector(1 downto 0);
       clk: in std_logic;
       
       rd: out std_logic_vector(N-1 downto 0)
     );
   end component;
 
+  signal PC_temp: std_logic_vector(PC_Size-1 downto 0);
+  signal instr_temp: std_logic_vector(I-1 downto 0);
+  
   signal op_temp: std_logic_vector(3 downto 0);
   signal ALU_op: std_logic_vector(1 downto 0);
   
-  signal rs_addr: std_logic_vector(1 downto 0);
-  signal rt_addr: std_logic_vector(1 downto 0);
-  signal rd_addr: std_logic_vector(1 downto 0);
+  signal rs_addr: std_logic_vector(K-1 downto 0);
+  signal rt_addr: std_logic_vector(K-1 downto 0);
+  signal rd_addr: std_logic_vector(K-1 downto 0);
   
   signal rs_reg: std_logic_vector(N-1 downto 0);
   signal rt_reg: std_logic_vector(N-1 downto 0);
@@ -106,17 +125,25 @@ architecture Structural of simple_processor is
               "00";
     
     select_data <= '1' when op_temp(3 downto 2)  = "11" else      -- select data from ALU
-                   '0';                                           -- select data from user input assign 
+                   '0';                                           -- select data from user input instruction for assign to rd register 
 
-    wr_temp <= wr when op_temp(3 downto 2) = "00" else            -- when user want to assign data to register - manual enable write
-               '1' when op_temp(3 downto 2) = "11";               -- when ALU mode always write data to rd
+    wr_temp <= '1' when op_temp(3 downto 2) = "00" else             -- when user want to assign data to register from instruction
+               '1' when op_temp(3 downto 2) = "11" else               -- when ALU mode always write data to rd
+               '0';
     
-    data_temp <= wr_data when select_data = '0' else
+    data_temp <= (rs_addr & rt_addr) when select_data = '0' else            -- assign value from instruction
                  rd_reg;
     
     
+    
+    U00: PC
+      port map(clk, PC_temp);
+    
+    U01: instruction_mem  
+      port map(PC_temp, instr_temp);
+    
     U0: split_instruction
-      port map(instr, op_temp, rs_addr, rt_addr, rd_addr);
+      port map(instr_temp, op_temp, rs_addr, rt_addr, rd_addr);
       
     U1: reg_file
       port map(clk, data_temp, rd_addr, wr_temp, rs_addr, rt_addr, rs_reg, rt_reg);

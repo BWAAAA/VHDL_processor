@@ -21,7 +21,7 @@ use work.mymatrix.all;
 entity N_bit_selector_MUX is
   
   generic(
-    K: integer := 2;  -- selector size, 2**K input
+    K: integer := 4;  -- selector size, 2**K input
     N: integer := 8   -- each input size
   );
   
