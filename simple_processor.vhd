@@ -75,6 +75,17 @@ architecture Structural of simple_processor is
 
   end component;
 
+  component control is 
+    port(
+      op: in std_logic_vector(3 downto 0);
+      
+      ALUop: out std_logic_vector(1 downto 0);
+      sel_data: out std_logic;
+      wr: out std_logic
+    );
+  end component;
+  
+  
   component Split_instruction is
     port(
       instr: in std_logic_vector(I-1 downto 0);   -- instruction input
@@ -132,35 +143,29 @@ architecture Structural of simple_processor is
   
   
   begin
-  
-    ALU_op <= op_temp(1 downto 0) when op_temp(3 downto 2) = "11" else
-              "00";
-    
-    select_data <= '1' when op_temp(3 downto 2)  = "11" else      -- select data from ALU
-                   '0';                                           -- select data from user input instruction for assign to rd register 
-
-    wr_temp <= '1' when op_temp(3 downto 2) = "00" else             -- when user want to assign data to register from instruction
-               '1' when op_temp(3 downto 2) = "11" else               -- when ALU mode always write data to rd
-               '0';
     
     data_temp <= (rs_addr & rt_addr) when select_data = '0' else            -- assign value from instruction
                  rd_reg;
     
     
     
-    U00: PC
+    
+    Program_counter: PC
       port map(clk, PC_temp);
     
-    U01: instruction_mem  
+    instruction_memory : instruction_mem  
       port map(PC_temp, instr_temp);
+    
+    control_unit: control
+      port map(op_temp, ALU_op, select_data, wr_temp);
     
     U0: split_instruction
       port map(instr_temp, op_temp, rs_addr, rt_addr, rd_addr);
       
-    U1: reg_file
+    register_file: reg_file
       port map(clk, data_temp, rd_addr, wr_temp, rs_addr, rt_addr, rs_reg, rt_reg);
       
-    U2: ALU
+    Arithmetic_logic_unit: ALU
       port map(rs_reg, rt_reg, ALU_op, clk, rd_reg);
     
   
